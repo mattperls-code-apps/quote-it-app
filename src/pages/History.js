@@ -74,6 +74,55 @@ const HistoryPage = ({ navigation, route }) => {
         }).start()
     }
 
+    const sharableImageRef = useRef()
+
+    const share = () => {
+        captureRef(sharableImageRef, {
+            format: "png"
+        }).then(uri => {
+            try {
+                Share.open({
+                    title: "Shared from Quote It",
+                    url: uri,
+                    showAppsToView: true
+                })
+            } catch(error){
+                console.warn(error)
+            }
+        })
+    }
+
+    const deleteQuote = () => {
+        const storage = new Storage()
+        storage.initialize(() => {
+            storage.delete(quotes[focusIndex].id, () => {
+                const updatedQuotes = quotes.filter((item) => item.id != quotes[focusIndex].id)
+                if(updatedQuotes.length == 0){
+                    navigation.goBack()
+                } else {
+                    setFocusIndex(0)
+                    setQuotes(updatedQuotes)
+                    closeOverlay()
+                }
+            })
+        })
+    }
+
+    const instagramStory = () => {
+        captureRef(sharableImageRef, {
+            format: "png"
+        }).then(uri => {
+            try {
+                Share.shareSingle({
+                    backgroundImage: uri,
+                    social: Share.Social.INSTAGRAM_STORIES
+                })
+            } catch(error){
+                console.warn(error)
+            }
+        })
+    }
+
     const quoteRenders = []
     for(let i = 0;i<Math.floor(quotes.length / 2);i++){
         const quoteInfo1 = quotes[i * 2].info
@@ -113,39 +162,6 @@ const HistoryPage = ({ navigation, route }) => {
                 </TouchableWithoutFeedback>
             </View>
         )
-    }
-
-    const sharableImageRef = useRef()
-
-    const share = () => {
-        captureRef(sharableImageRef, {
-            format: "png"
-        }).then(uri => {
-            try {
-                Share.open({
-                    title: "Shared from Quote It",
-                    url: uri,
-                    showAppsToView: true
-                })
-            } catch(error){
-                console.warn(error)
-            }
-        })
-    }
-
-    const instagramStory = () => {
-        captureRef(sharableImageRef, {
-            format: "png"
-        }).then(uri => {
-            try {
-                Share.shareSingle({
-                    backgroundImage: uri,
-                    social: Share.Social.INSTAGRAM_STORIES
-                })
-            } catch(error){
-                console.warn(error)
-            }
-        })
     }
     
     return (
@@ -217,21 +233,7 @@ const HistoryPage = ({ navigation, route }) => {
                                     }}>
                                         <Text style={styles.interactionButtonText}>Edit</Text>
                                     </Button>
-                                    <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={() => {
-                                        const storage = new Storage()
-                                        storage.initialize(() => {
-                                            storage.delete(quotes[focusIndex].id, () => {
-                                                const updatedQuotes = quotes.filter((item) => item.id != quotes[focusIndex].id)
-                                                if(updatedQuotes.length == 0){
-                                                    navigation.goBack()
-                                                } else {
-                                                    setFocusIndex(0)
-                                                    setQuotes(updatedQuotes)
-                                                    closeOverlay()
-                                                }
-                                            })
-                                        })
-                                    }}>
+                                    <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={deleteQuote}>
                                         <Text style={styles.interactionButtonText}>Delete</Text>
                                     </Button>
                                 </View>

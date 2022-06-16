@@ -12,14 +12,14 @@ const StaticQuoteGraphic = ({ quote, quotee, font, color, scale, renderHeight })
     return (
         <LinearGradient style={styles.quoteGraphic} colors={color} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             <View style={styles.quoteTextContainer}>
-                <Text style={styles.quoteText}>
+                <Text style={styles.quoteText} allowFontScaling={false}>
                     {
                         quote
                     }
                 </Text>
             </View>
             <View style={styles.quoteeTextContainer}>
-                <Text style={styles.quoteeText} numberOfLines={1} ellipsizeMode={"tail"}>
+                <Text style={styles.quoteeText} numberOfLines={1} ellipsizeMode={"tail"} allowFontScaling={false}>
                     {
                         "- " + quotee
                     }
@@ -40,13 +40,13 @@ const EditableQuoteGraphic = ({ quote, setQuote, quotee, setQuotee, font, color,
             <LinearGradient style={styles.quoteGraphic} colors={color} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                 <TouchableWithoutFeedback onPress={() => { quoteText.current.focus() }}>
                     <View style={styles.quoteTextContainer}>
-                        <TextInput ref={quoteText} style={styles.quoteText} multiline value={quote} onChangeText={setQuote} placeholder={"Awesome Quote Here"} placeholderTextColor={colors.dark} />
+                        <TextInput ref={quoteText} style={styles.quoteText} multiline value={quote} onChangeText={setQuote} placeholder={"Awesome Quote Here"} placeholderTextColor={colors.dark} allowFontScaling={false} />
                     </View>
                 </TouchableWithoutFeedback>
                 <TouchableWithoutFeedback onPress={() => { quoteeText.current.focus() }}>
                 <View style={styles.quoteeTextContainer}>
                     <Text style={styles.quoteeText}>- </Text>
-                    <TextInput ref={quoteeText} style={styles.quoteeText} multiline={false} value={quotee} onChangeText={setQuotee} placeholder={"Quotee Here"} placeholderTextColor={colors.dark} />
+                    <TextInput ref={quoteeText} style={styles.quoteeText} multiline={false} value={quotee} onChangeText={setQuotee} placeholder={"Quotee Here"} placeholderTextColor={colors.dark} allowFontScaling={false} />
                 </View>
                 </TouchableWithoutFeedback>
             </LinearGradient>

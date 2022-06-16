@@ -43,6 +43,26 @@ const CreatePage = ({ navigation, route }) => {
         })
     }, [])
 
+    const save = () => {
+        const formatted = quotee.trim().replace(/\s\s+/g, " ").split(" ").map(s => s.slice(0, 1).toUpperCase() + s.slice(1)).join(" ")
+        const formattedQuotee = formatted.length == 0 ? "Unknown" : formatted
+
+        const storage = new Storage()
+        storage.initialize(() => {
+            storage.update(route.params.id, {
+                quote,
+                quotee,
+                formattedQuotee,
+                font,
+                color,
+                scale
+            }, () => {
+                navigation.goBack()
+                navigation.push("History", { formattedQuotee })
+            })
+        })
+    }
+
     const [tool, setTool] = useState("")
 
     let toolRender = null
@@ -87,25 +107,7 @@ const CreatePage = ({ navigation, route }) => {
                 }}>
                     <FontAwesomeIcon icon={faX} color={colors.extraLight} size={24} />
                 </Button>
-                <Button style={styles.headerButton} onPress={() => {
-                    const formatted = quotee.trim().replace(/\s\s+/g, " ").split(" ").map(s => s.slice(0, 1).toUpperCase() + s.slice(1)).join(" ")
-                    const formattedQuotee = formatted.length == 0 ? "Unknown" : formatted
-
-                    const storage = new Storage()
-                    storage.initialize(() => {
-                        storage.update(route.params.id, {
-                            quote,
-                            quotee,
-                            formattedQuotee,
-                            font,
-                            color,
-                            scale
-                        }, () => {
-                            navigation.goBack()
-                            navigation.push("History", { formattedQuotee })
-                        })
-                    })
-                }}>
+                <Button style={styles.headerButton} onPress={save}>
                     <Text style={styles.saveButtonText}>Save</Text>
                 </Button>
             </View>
