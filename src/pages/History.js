@@ -11,10 +11,9 @@ import { faX, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-
 
 import ViewShot, { captureRef } from "react-native-view-shot"
 import Share from "react-native-share"
+import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 
 import Storage from "../scripts/storage"
-
-import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 
 import { screen, colors } from "../constants"
 
@@ -36,6 +35,11 @@ const HistoryPage = ({ navigation, route }) => {
     const interactionBarOffset = useRef(new Animated.Value(0)).current
 
     const [focusIndex, setFocusIndex] = useState(0)
+
+    const [confirmDeleteOverride, setConfirmDeleteOverride] = useState(false)
+
+    const [showSelector, setShowSelector] = useState(false)
+    const [selected, setSelected] = useState([])
 
     const closeOverlay = (callback) => {
         setShowGraphic(false)
@@ -79,12 +83,11 @@ const HistoryPage = ({ navigation, route }) => {
     const share = () => {
         captureRef(sharableImageRef, {
             format: "png"
-        }).then(uri => {
+        }).then(url => {
             try {
                 Share.open({
-                    title: "Shared from Quote It",
-                    url: uri,
-                    showAppsToView: true
+                    message: "Shared from Quote It",
+                    url
                 })
             } catch(error){
                 console.warn(error)
@@ -130,19 +133,77 @@ const HistoryPage = ({ navigation, route }) => {
         quoteRenders.push(
             <View key={i} style={styles.doubleItemGroup}>
                 <TouchableWithoutFeedback onPress={() => {
-                    setFocusIndex(i * 2)
-                    openOverlay()
+                    if(showSelector){
+                        if(selected.includes(i * 2)){
+                            let temp = [...selected]
+                            temp.splice(temp.indexOf(i * 2), 1)
+
+                            setSelected(temp)
+                        } else if(selected.length < 5){
+                            let temp = [...selected]
+                            temp.push(i * 2)
+
+                            setSelected(temp)
+                        }
+                    } else {
+                        setFocusIndex(i * 2)
+                        openOverlay()
+                    }
                 }}>
                     <View>
                         <StaticQuoteGraphic quote={quoteInfo1.quote} quotee={quoteInfo1.quotee} font={quoteInfo1.font} color={quoteInfo1.color} scale={quoteInfo1.scale} renderHeight={renderHeight} />
+                        {
+                            showSelector && (
+                                <View style={styles.selectorBadge}>
+                                    {
+                                        selected.includes(i * 2) && (
+                                            <Text>
+                                                {
+                                                    selected.indexOf(i * 2) + 1
+                                                }
+                                            </Text>
+                                        )
+                                    }
+                                </View>
+                            )
+                        }
                     </View>
                 </TouchableWithoutFeedback>
                 <TouchableWithoutFeedback onPress={() => {
-                    setFocusIndex(i * 2 + 1)
-                    openOverlay()
+                    if(showSelector){
+                        if(selected.includes(i * 2 + 1)){
+                            let temp = [...selected]
+                            temp.splice(temp.indexOf(i * 2 + 1), 1)
+
+                            setSelected(temp)
+                        } else if(selected.length < 5){
+                            let temp = [...selected]
+                            temp.push(i * 2 + 1)
+
+                            setSelected(temp)
+                        }
+                    } else {
+                        setFocusIndex(i * 2 + 1)
+                        openOverlay()
+                    }
                 }}>
                     <View>
                         <StaticQuoteGraphic quote={quoteInfo2.quote} quotee={quoteInfo2.quotee} font={quoteInfo2.font} color={quoteInfo2.color} scale={quoteInfo2.scale} renderHeight={renderHeight} />
+                        {
+                            showSelector && (
+                                <View style={styles.selectorBadge}>
+                                    {
+                                        selected.includes(i * 2 + 1) && (
+                                            <Text>
+                                                {
+                                                    selected.indexOf(i * 2 + 1) + 1
+                                                }
+                                            </Text>
+                                        )
+                                    }
+                                </View>
+                            )
+                        }
                     </View>
                 </TouchableWithoutFeedback>
             </View>
@@ -153,11 +214,40 @@ const HistoryPage = ({ navigation, route }) => {
         quoteRenders.push(
             <View key={Math.floor(quotes.length / 2)} style={styles.singleItemGroup}>
                 <TouchableWithoutFeedback onPress={() => {
-                    setFocusIndex(quotes.length - 1)
-                    openOverlay()
+                    if(showSelector){
+                        if(selected.includes(quotes.length - 1)){
+                            let temp = [...selected]
+                            temp.splice(temp.indexOf(quotes.length - 1), 1)
+
+                            setSelected(temp)
+                        } else if(selected.length < 5){
+                            let temp = [...selected]
+                            temp.push(quotes.length - 1)
+
+                            setSelected(temp)
+                        }
+                    } else {
+                        setFocusIndex(quotes.length - 1)
+                        openOverlay()
+                    }
                 }}>
                     <View ref={sharableImageRef}>
                         <StaticQuoteGraphic quote={quoteInfo.quote} quotee={quoteInfo.quotee} font={quoteInfo.font} color={quoteInfo.color} scale={quoteInfo.scale} renderHeight={renderHeight} />
+                        {
+                            showSelector && (
+                                <View style={styles.selectorBadge}>
+                                    {
+                                        selected.includes(quotes.length - 1) && (
+                                            <Text>
+                                                {
+                                                    selected.indexOf(quotes.length - 1) + 1
+                                                }
+                                            </Text>
+                                        )
+                                    }
+                                </View>
+                            )
+                        }
                     </View>
                 </TouchableWithoutFeedback>
             </View>
@@ -168,14 +258,14 @@ const HistoryPage = ({ navigation, route }) => {
         <Page>
             <View style={styles.headerContainer}>
                 <Button style={[styles.navigationButton, { width: 80 }]} onPress={() => {
-                        if(showGraphic){
-                            closeOverlay(navigation.goBack)
-                        } else {
-                            navigation.goBack()
-                        }
-                    }}>
-                        <FontAwesomeIcon icon={faX} color={colors.extraLight} size={24} />
-                    </Button>
+                    if(showGraphic){
+                        closeOverlay(navigation.goBack)
+                    } else {
+                        navigation.goBack()
+                    }
+                }}>
+                    <FontAwesomeIcon icon={faX} color={colors.extraLight} size={24} />
+                </Button>
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.headerText} numberOfLines={2} ellipsizeMode="tail">
                         {
@@ -186,16 +276,31 @@ const HistoryPage = ({ navigation, route }) => {
             </View>
             <ScrollView style={styles.itemsContainer} showsVerticalScrollIndicator={false}>
                 <TouchableWithoutFeedback>
-                    <View>
-                        {
-                            quoteRenders
-                        }
+                    <View style={{ marginBottom: 20 }}>
                         <Button style={styles.createButton} onPress={() => {
                             navigation.goBack()
                             navigation.push("Create", { id: Date.now(), quotee: route.params.formattedQuotee })
                         }}>
                             <Text style={styles.createButtonText}>Create New Quote</Text>
                         </Button>
+                        <Button style={styles.createButton} onPress={() => {
+                            setShowSelector(true)
+                            Animated.timing(interactionBarOffset, {
+                                toValue: -180,
+                                duration: 200,
+                                useNativeDriver: true
+                            }).start()
+                        }}>
+                            <Text style={styles.createButtonText}>Share To Quote It</Text>
+                        </Button>
+                        {
+                            quoteRenders
+                        }
+                        {
+                            showSelector && (
+                                <View style={{ height: 180 }} />
+                            )
+                        }
                     </View>
                 </TouchableWithoutFeedback>
             </ScrollView>
@@ -222,39 +327,123 @@ const HistoryPage = ({ navigation, route }) => {
                                     }
                                 </View>
                             </TouchableWithoutFeedback>
-                            <Animated.View style={[styles.overlayInteractionBarContainer, { transform: [{ translateY: interactionBarOffset }] }]}>
-                                <View style={styles.interactionButtonsContainer}>
-                                    <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={share}>
-                                        <Text style={styles.interactionButtonText}>Share</Text>
-                                    </Button>
-                                    <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={() => {
-                                        navigation.goBack()
-                                        navigation.push("Create", { id: quotes[focusIndex].id })
-                                    }}>
-                                        <Text style={styles.interactionButtonText}>Edit</Text>
-                                    </Button>
-                                    <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={deleteQuote}>
-                                        <Text style={styles.interactionButtonText}>Delete</Text>
-                                    </Button>
-                                </View>
-                                <View style={styles.interactionButtonsContainer}>
-                                    <Button style={[styles.interactionButton, { width: 60 }]} onPress={() => {
-                                        setFocusIndex((focusIndex - 1 + quotes.length) % quotes.length)
-                                    }}>
-                                        <FontAwesomeIcon icon={faChevronLeft} color={colors.extraLight} size={22} />
-                                    </Button>
-                                    <Button style={[styles.interactionButton, { width: screen.width - 200 }]} onPress={instagramStory}>
-                                        <Text style={styles.interactionButtonText}>Instagram Story</Text>
-                                    </Button>
-                                    <Button style={[styles.interactionButton, { width: 60 }]} onPress={() => {
-                                        setFocusIndex((focusIndex + 1) % quotes.length)
-                                    }}>
-                                        <FontAwesomeIcon icon={faChevronRight} color={colors.extraLight} size={22} />
-                                    </Button>
-                                </View>
+                            <Animated.View style={[styles.interactionBarContainer, { transform: [{ translateY: interactionBarOffset }] }]}>
+                                {
+                                    confirmDeleteOverride ? (
+                                        <React.Fragment>
+                                            <View style={styles.interactionButtonsContainer}>
+                                                <Button style={[styles.interactionButton, { width: screen.width - 40, backgroundColor: colors.red }]} onPress={() => {
+                                                    setConfirmDeleteOverride(false)
+                                                    closeOverlay()
+                                                }}>
+                                                    <Text style={styles.interactionButtonText}>Cancel</Text>
+                                                </Button>
+                                            </View>
+                                            <View style={styles.interactionButtonsContainer}>
+                                                <Button style={[styles.interactionButton, { width: screen.width - 40 }]} onPress={deleteQuote}>
+                                                    <Text style={styles.interactionButtonText}>Delete</Text>
+                                                </Button>
+                                            </View>
+                                        </React.Fragment>
+                                    ) : (
+                                        <React.Fragment>
+                                            <View style={styles.interactionButtonsContainer}>
+                                                <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={share}>
+                                                    <Text style={styles.interactionButtonText}>Share</Text>
+                                                </Button>
+                                                <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={() => {
+                                                    navigation.goBack()
+                                                    navigation.push("Create", { id: quotes[focusIndex].id })
+                                                }}>
+                                                    <Text style={styles.interactionButtonText}>Edit</Text>
+                                                </Button>
+                                                <Button style={[styles.interactionButton, { width: (screen.width - 80) / 3 }]} onPress={() => {
+                                                    setConfirmDeleteOverride(true)
+                                                }}>
+                                                    <Text style={styles.interactionButtonText}>Delete</Text>
+                                                </Button>
+                                            </View>
+                                            <View style={styles.interactionButtonsContainer}>
+                                                <Button style={[styles.interactionButton, { width: 60 }]} onPress={() => {
+                                                    setFocusIndex((focusIndex - 1 + quotes.length) % quotes.length)
+                                                }}>
+                                                    <FontAwesomeIcon icon={faChevronLeft} color={colors.extraLight} size={22} />
+                                                </Button>
+                                                <Button style={[styles.interactionButton, { width: screen.width - 200 }]} onPress={instagramStory}>
+                                                    <Text style={styles.interactionButtonText}>Instagram Story</Text>
+                                                </Button>
+                                                <Button style={[styles.interactionButton, { width: 60 }]} onPress={() => {
+                                                    setFocusIndex((focusIndex + 1) % quotes.length)
+                                                }}>
+                                                    <FontAwesomeIcon icon={faChevronRight} color={colors.extraLight} size={22} />
+                                                </Button>
+                                            </View>
+                                        </React.Fragment>
+                                    )
+                                }
                             </Animated.View>
                         </Animated.View>
                     </View>
+                )
+            }
+            {
+                showSelector && (
+                    <Animated.View style={[styles.interactionBarContainer, { transform: [{ translateY: interactionBarOffset }] }]}>
+                        <View style={styles.interactionButtonsContainer}>
+                            <Button style={[styles.interactionButton, { width: screen.width - 40, backgroundColor: colors.red }]} onPress={() => {
+                                Animated.timing(interactionBarOffset, {
+                                    toValue: 0,
+                                    duration: 200,
+                                    useNativeDriver: true
+                                }).start(() => {
+                                    setShowSelector(false)
+                                    setSelected([])
+                                })
+                            }}>
+                                <Text style={styles.interactionButtonText}>Cancel</Text>
+                            </Button>
+                        </View>
+                        <View style={styles.interactionButtonsContainer}>
+                            <Button style={[styles.interactionButton, { width: screen.width - 40 }]} onPress={() => {
+                                if(selected.length == 0){
+                                    Animated.timing(interactionBarOffset, {
+                                        toValue: 0,
+                                        duration: 200,
+                                        useNativeDriver: true
+                                    }).start(() => {
+                                        setShowSelector(false)
+                                        setSelected([])
+                                    })
+                                } else {
+                                    const quotesToShare = []
+                                    selected.forEach((selectedQuote) => {
+                                        quotesToShare.push(quotes[selectedQuote])
+                                    })
+                                    const url = `quoteit://share/${encodeURI(JSON.stringify(quotesToShare))}`
+
+                                    try {
+                                        Share.open({
+                                            message: "Shared from Quote It",
+                                            url
+                                        }).then(() => {
+                                            Animated.timing(interactionBarOffset, {
+                                                toValue: 0,
+                                                duration: 200,
+                                                useNativeDriver: true
+                                            }).start(() => {
+                                                setShowSelector(false)
+                                                setSelected([])
+                                            })
+                                        })
+                                    } catch(error){
+                                        console.warn(error)
+                                    }
+                                }
+                            }}>
+                                <Text style={styles.interactionButtonText}>Share Selected Quotes ({ selected.length })</Text>
+                            </Button>
+                        </View>
+                    </Animated.View>
                 )
             }
             {
@@ -323,6 +512,25 @@ const styles = StyleSheet.create({
         justifyContent: "space-evenly",
         flexDirection: "row"
     },
+    selectorBadge: {
+        position: "absolute",
+        top: -10,
+        left: -10,
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        backgroundColor: colors.extraLight,
+        borderWidth: 2,
+        borderColor: colors.flair,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    selectorBadgeText: {
+        fontFamily: "Roboto",
+        fontWeight: "700",
+        fontSize: 20,
+        color: colors.extraDark
+    },
     createButton: {
         marginTop: 20,
         width: screen.width - 40,
@@ -351,7 +559,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center"
     },
-    overlayInteractionBarContainer: {
+    interactionBarContainer: {
         position: "absolute",
         bottom: -180,
         width: screen.width,

@@ -15,6 +15,7 @@ import Slider from "@react-native-community/slider"
 
 import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 
+import formatQuotee from "../scripts/formatQuotee"
 import Storage from "../scripts/storage"
 
 import { screen, colors, graphicFonts, graphicColorSchemes } from "../constants"
@@ -34,7 +35,7 @@ const CreatePage = ({ navigation, route }) => {
             const info = storage.getInfo(route.params.id)
 
             setQuote(info.quote)
-            setQuotee(route.params.quotee ? route.params.quotee : info.quotee)
+            setQuotee(route.params.quotee ?? info.quotee)
             setFont(info.font)
             setColor(info.color)
             setScale(info.scale)
@@ -44,21 +45,17 @@ const CreatePage = ({ navigation, route }) => {
     }, [])
 
     const save = () => {
-        const formatted = quotee.trim().replace(/\s\s+/g, " ").split(" ").map(s => s.slice(0, 1).toUpperCase() + s.slice(1)).join(" ")
-        const formattedQuotee = formatted.length == 0 ? "Unknown" : formatted
-
         const storage = new Storage()
         storage.initialize(() => {
             storage.update(route.params.id, {
                 quote,
                 quotee,
-                formattedQuotee,
                 font,
                 color,
                 scale
             }, () => {
                 navigation.goBack()
-                navigation.push("History", { formattedQuotee })
+                navigation.push("History", { formattedQuotee: formatQuotee(quotee) })
             })
         })
     }
@@ -68,11 +65,11 @@ const CreatePage = ({ navigation, route }) => {
     let toolRender = null
     if(tool == "font"){
         const fontOptions = []
-        graphicFonts.forEach((fontOption, index) => {
+        for(let i = 0;i<graphicFonts.length;i++){
             fontOptions.push(
-                <FontOption key={index} graphicsFont={fontOption} setFont={setFont} />
+                <FontOption key={i} fontIndex={i} setFont={setFont} />
             )
-        })
+        }
         toolRender = fontOptions
     } else if(tool == "color"){
         const colorOptions = []
@@ -82,7 +79,7 @@ const CreatePage = ({ navigation, route }) => {
                     ReactNativeHapticFeedback.trigger("impactLight", {
                         enableVibrateFallback: false
                     })
-                    setColor(graphicColorSchemes[index])
+                    setColor(index)
                 }}>
                     <LinearGradient style={{ marginHorizontal: 7.5, width: 30, height: 30, borderRadius: 5 }} colors={colorOption} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
                 </TouchableWithoutFeedback>

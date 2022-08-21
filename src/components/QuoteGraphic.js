@@ -4,13 +4,13 @@ import { TouchableWithoutFeedback, View, Text, TextInput, StyleSheet, Keyboard }
 
 import LinearGradient from "react-native-linear-gradient"
 
-import { colors } from "../constants"
+import { colors, graphicFonts, graphicColorSchemes } from "../constants"
 
 const StaticQuoteGraphic = ({ quote, quotee, font, color, scale, renderHeight }) => {
     const styles = generateQuoteGraphicStyles({ font, scale, renderHeight })
 
     return (
-        <LinearGradient style={styles.quoteGraphic} colors={color} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+        <LinearGradient style={styles.quoteGraphic} colors={graphicColorSchemes[color]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             <View style={styles.quoteTextContainer}>
                 <Text style={styles.quoteText} allowFontScaling={false}>
                     {
@@ -37,16 +37,16 @@ const EditableQuoteGraphic = ({ quote, setQuote, quotee, setQuotee, font, color,
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <LinearGradient style={styles.quoteGraphic} colors={color} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            <LinearGradient style={styles.quoteGraphic} colors={graphicColorSchemes[color]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                 <TouchableWithoutFeedback onPress={() => { quoteText.current.focus() }}>
                     <View style={styles.quoteTextContainer}>
-                        <TextInput ref={quoteText} style={styles.quoteText} multiline value={quote} onChangeText={setQuote} placeholder={"Awesome Quote Here"} placeholderTextColor={colors.dark} allowFontScaling={false} />
+                        <TextInput ref={quoteText} style={styles.quoteText} multiline maxLength={150} value={quote} onChangeText={setQuote} placeholder={"Awesome Quote Here"} placeholderTextColor={colors.dark} allowFontScaling={false} />
                     </View>
                 </TouchableWithoutFeedback>
                 <TouchableWithoutFeedback onPress={() => { quoteeText.current.focus() }}>
                 <View style={styles.quoteeTextContainer}>
                     <Text style={styles.quoteeText}>- </Text>
-                    <TextInput ref={quoteeText} style={styles.quoteeText} multiline={false} value={quotee} onChangeText={setQuotee} placeholder={"Quotee Here"} placeholderTextColor={colors.dark} allowFontScaling={false} />
+                    <TextInput ref={quoteeText} style={styles.quoteeText} multiline={false} maxLength={50} value={quotee} onChangeText={setQuotee} placeholder={"Quotee Here"} placeholderTextColor={colors.dark} allowFontScaling={false} />
                 </View>
                 </TouchableWithoutFeedback>
             </LinearGradient>
@@ -72,7 +72,7 @@ const generateQuoteGraphicStyles = ({ font, scale, renderHeight }) => {
             flexDirection: "row"
         },
         quoteText: {
-            fontFamily: font.fontFamily,
+            fontFamily: graphicFonts[font].fontFamily,
             fontSize: 0.06 * renderHeight * scale,
             color: colors.extraDark,
             textAlign: "center"
@@ -84,7 +84,7 @@ const generateQuoteGraphicStyles = ({ font, scale, renderHeight }) => {
             flexDirection: "row"
         },
         quoteeText: {
-            fontFamily: font.fontFamily,
+            fontFamily: graphicFonts[font].fontFamily,
             fontSize: 0.05 * renderHeight * scale,
             color: colors.extraDark
         }

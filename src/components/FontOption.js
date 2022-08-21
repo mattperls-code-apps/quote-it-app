@@ -4,14 +4,14 @@ import { Text, StyleSheet } from "react-native"
 
 import Button from "./Button"
 
-import { colors } from "../constants"
+import { colors, graphicFonts } from "../constants"
 
-const FontOption = ({ graphicsFont, setFont }) => {
+const FontOption = ({ fontIndex, setFont }) => {
     return (
-        <Button onPress={() => { setFont(graphicsFont) }}>
-            <Text style={[styles.fontOption, { fontFamily: graphicsFont.fontFamily }]}>
+        <Button onPress={() => { setFont(fontIndex) }}>
+            <Text style={[styles.fontOption, { fontFamily: graphicFonts[fontIndex].fontFamily }]}>
                 {
-                    graphicsFont.key
+                    graphicFonts[fontIndex].key
                 }
             </Text>
         </Button>

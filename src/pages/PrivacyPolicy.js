@@ -45,7 +45,7 @@ const PrivacyPolicyPage = ({ navigation }) => {
                     <Text style={styles.normal}>
                         We do not collect, share, or otherwise transmit any data from the app.
                         In the app itself, we only store the data directly provided by your use of the app.
-                        Specifically, this data is a record of your agreement to the last terms and conditions you agreed to, the questions, input, and results you choose to save to the in-app history as wel as the user preferences you can optionally provide.
+                        Specifically, this data is the text and styling information you provide when you create a new quote in the app
                         No sensitive information (name, contact information, device name, IP, address, browser, location, language) is stored in this app.
                     </Text>
                     <Text style={styles.subheader}>Information that is shared by the user</Text>
