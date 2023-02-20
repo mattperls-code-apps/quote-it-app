@@ -2,16 +2,18 @@ import { initialWindowMetrics } from "react-native-safe-area-context"
 
 const screen = {
     width: initialWindowMetrics.frame.width - initialWindowMetrics.insets.left - initialWindowMetrics.insets.right,
-    height: initialWindowMetrics.frame.height - initialWindowMetrics.insets.top - initialWindowMetrics.insets.bottom
+    height: initialWindowMetrics.frame.height - initialWindowMetrics.insets.top - initialWindowMetrics.insets.bottom - 80,
+    bottom: initialWindowMetrics.insets.bottom
 }
 
 const colors = {
-    extraLight: "rgb(240, 240, 240)",
-    light: "rgb(210, 210, 210)",
+    extraLight: "rgb(250, 250, 250)",
+    light: "rgb(220, 220, 220)",
     dark: "rgb(70, 70, 70)",
     extraDark: "rgb(0, 0, 0)",
     flair: "rgb(100, 150, 250)",
-    red: "rgb(240, 110, 110)"
+    red: "rgb(240, 110, 110)",
+    green: "rgb(40, 250, 120)"
 }
 
 const graphicFontsV1 = [
@@ -39,13 +41,20 @@ const graphicFonts = [
 ]
 
 const graphicColorSchemes = [
-    [ "#ff8080", "#ffa6a6" ],
-    [ "#ffbf80", "#ffd2a6" ],
-    [ "#ffff80", "#ffffa6" ],
-    [ "#80ff80", "#a6ffa6" ],
-    [ "#8080ff", "#a6a6ff" ],
-    [ "#cc80ff", "#dba6ff" ],
-    [ "#ff80cc", "#ffa6db" ]
+    [ "#ff8080", "#ffc2c2" ],
+    [ "#ffbf80", "#ffdfbf" ],
+    [ "#ffff80", "#fcfccf" ],
+    [ "#80ff80", "#d7fcd7" ],
+
+
+    [ "#9e9eff", "#d4d4ff" ],
+
+    [ "#d28fff", "#e7c2ff" ],
+    [ "#fc90d1", "#ffcfec" ]
 ]
 
-export { screen, colors, graphicFontsV1, graphicColorSchemesV1, graphicFonts, graphicColorSchemes }
+const purchaseIds = {
+    roulette: "com.mattperlscode.quoteit.roulette"
+}
+
+export { screen, colors, graphicFontsV1, graphicColorSchemesV1, graphicFonts, graphicColorSchemes, purchaseIds }

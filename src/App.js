@@ -1,17 +1,21 @@
 import React, { useEffect } from "react"
 
-import { StatusBar } from "react-native"
+import { StatusBar, StyleSheet } from "react-native"
 
 import { NavigationContainer } from "@react-navigation/native"
-import { createStackNavigator } from "@react-navigation/stack"
+import  { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 
-import HomePage from "./pages/Home"
-import CreatePage from "./pages/Create"
-import HistoryPage from "./pages/History"
-import PrivacyPolicyPage from "./pages/PrivacyPolicy"
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
+import { faHome, faPersonCircleQuestion, faCogs } from "@fortawesome/free-solid-svg-icons"
+
+import QuotesTab from "./tabs/quotes/Quotes"
+import RouletteTab from "./tabs/roulette/Roulette"
+import SettingsTab from "./tabs/settings/Settings"
+
+import { colors, screen } from "./constants"
 
 const App = () => {
-    const Stack = createStackNavigator()
+    const Tab = createBottomTabNavigator()
 
     useEffect(() => {
         StatusBar.setBarStyle("dark-content")
@@ -19,16 +23,48 @@ const App = () => {
 
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName={"Home"} screenOptions={{
-                headerShown: false
+            <Tab.Navigator initialRouteName={"Quotes"} screenOptions={({ route }) => {
+                return {
+                    headerShown: false,
+                    tabBarStyle: styles.tabContainer,
+                    tabBarIcon: ({ focused, color, size }) => {
+                        let icon
+
+                        switch(route.name){
+                            case "Quotes":
+                                icon = faHome
+                                break
+                            case "Roulette":
+                                icon = faPersonCircleQuestion
+                                break
+                            case "Settings":
+                                icon = faCogs
+                                break
+                        }
+
+                        return (
+                            <FontAwesomeIcon icon={icon} color={focused ? colors.extraDark : colors.flair} size={36} />
+                        )
+                    },
+                    tabBarShowLabel: false,
+                    lazy: false
+                }
             }}>
-                <Stack.Screen name={"Home"} component={HomePage} />
-                <Stack.Screen name={"Create"} component={CreatePage} />
-                <Stack.Screen name={"History"} component={HistoryPage} />
-                <Stack.Screen name={"PrivacyPolicy"} component={PrivacyPolicyPage} />
-            </Stack.Navigator>
+                <Tab.Screen name={"Quotes"} component={QuotesTab} />
+                <Tab.Screen name={"Roulette"} component={RouletteTab} />
+                <Tab.Screen name={"Settings"} component={SettingsTab} />
+            </Tab.Navigator>
         </NavigationContainer>
     )
 }
+
+const styles = StyleSheet.create({
+    tabContainer: {
+        height: 80 + screen.bottom,
+        borderTopWidth: 4,
+        borderTopColor: colors.flair,
+        backgroundColor: colors.extraLight
+    }
+})
 
 export default App

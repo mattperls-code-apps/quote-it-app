@@ -7,6 +7,12 @@ class Storage {
     constructor(){
         this.items = []
     }
+    static fromItems(items){
+        const storage = new Storage()
+        storage.items = items
+
+        return storage
+    }
     initialize(callback){
         AsyncStorage.getAllKeys((error, keys) => {
             if(error){
@@ -19,7 +25,6 @@ class Storage {
                         } else {
                             try {
                                 this.items = JSON.parse(storageString)
-                                console.log(this.items)
 
                                 // handle infrastructure change
                                 let rewrite = false

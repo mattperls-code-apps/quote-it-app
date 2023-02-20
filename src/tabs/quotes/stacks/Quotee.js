@@ -2,24 +2,24 @@ import React, { useRef, useState, useEffect } from "react"
 
 import { TouchableWithoutFeedback, View, ScrollView, Text, StyleSheet, Animated } from "react-native"
 
-import Page from "../components/Page"
-import Button from "../components/Button"
-import { StaticQuoteGraphic } from "../components/QuoteGraphic"
+import Page from "../../../components/Page"
+import Button from "../../../components/Button"
+import { StaticQuoteGraphic } from "../../../components/QuoteGraphic"
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
-import { faX, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons"
+import { faXmark, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons"
 
 import ViewShot, { captureRef } from "react-native-view-shot"
 import Share from "react-native-share"
 import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 
-import Storage from "../scripts/storage"
+import Storage from "../../../scripts/storage"
 
-import { screen, colors } from "../constants"
+import { screen, colors } from "../../../constants"
 
-const renderHeight = (0.5 * screen.width - 30) / 0.7
+const renderHeight = (0.5 * screen.width - 30) / 0.75
 
-const HistoryPage = ({ navigation, route }) => {
+const QuoteeStack = ({ navigation, route }) => {
     const [quotes, setQuotes] = useState([])
 
     useEffect(() => {
@@ -38,9 +38,6 @@ const HistoryPage = ({ navigation, route }) => {
 
     const [confirmDeleteOverride, setConfirmDeleteOverride] = useState(false)
 
-    const [showSelector, setShowSelector] = useState(false)
-    const [selected, setSelected] = useState([])
-
     const closeOverlay = (callback) => {
         setShowGraphic(false)
         Animated.timing(overlayOpacity, {
@@ -54,6 +51,7 @@ const HistoryPage = ({ navigation, route }) => {
             useNativeDriver: true
         }).start(() => {
             setShowOverlay(false)
+            setConfirmDeleteOverride(false)
             if(typeof callback == "function"){
                 callback()
             }
@@ -133,77 +131,19 @@ const HistoryPage = ({ navigation, route }) => {
         quoteRenders.push(
             <View key={i} style={styles.doubleItemGroup}>
                 <TouchableWithoutFeedback onPress={() => {
-                    if(showSelector){
-                        if(selected.includes(i * 2)){
-                            let temp = [...selected]
-                            temp.splice(temp.indexOf(i * 2), 1)
-
-                            setSelected(temp)
-                        } else if(selected.length < 5){
-                            let temp = [...selected]
-                            temp.push(i * 2)
-
-                            setSelected(temp)
-                        }
-                    } else {
-                        setFocusIndex(i * 2)
-                        openOverlay()
-                    }
+                    setFocusIndex(i * 2)
+                    openOverlay()
                 }}>
                     <View>
-                        <StaticQuoteGraphic quote={quoteInfo1.quote} quotee={quoteInfo1.quotee} font={quoteInfo1.font} color={quoteInfo1.color} scale={quoteInfo1.scale} renderHeight={renderHeight} />
-                        {
-                            showSelector && (
-                                <View style={styles.selectorBadge}>
-                                    {
-                                        selected.includes(i * 2) && (
-                                            <Text>
-                                                {
-                                                    selected.indexOf(i * 2) + 1
-                                                }
-                                            </Text>
-                                        )
-                                    }
-                                </View>
-                            )
-                        }
+                        <StaticQuoteGraphic quote={quoteInfo1.quote} quotee={quoteInfo1.quotee} timestamp={quotes[i * 2].id} font={quoteInfo1.font} color={quoteInfo1.color} scale={quoteInfo1.scale} renderHeight={renderHeight} />
                     </View>
                 </TouchableWithoutFeedback>
                 <TouchableWithoutFeedback onPress={() => {
-                    if(showSelector){
-                        if(selected.includes(i * 2 + 1)){
-                            let temp = [...selected]
-                            temp.splice(temp.indexOf(i * 2 + 1), 1)
-
-                            setSelected(temp)
-                        } else if(selected.length < 5){
-                            let temp = [...selected]
-                            temp.push(i * 2 + 1)
-
-                            setSelected(temp)
-                        }
-                    } else {
-                        setFocusIndex(i * 2 + 1)
-                        openOverlay()
-                    }
+                    setFocusIndex(i * 2 + 1)
+                    openOverlay()
                 }}>
                     <View>
-                        <StaticQuoteGraphic quote={quoteInfo2.quote} quotee={quoteInfo2.quotee} font={quoteInfo2.font} color={quoteInfo2.color} scale={quoteInfo2.scale} renderHeight={renderHeight} />
-                        {
-                            showSelector && (
-                                <View style={styles.selectorBadge}>
-                                    {
-                                        selected.includes(i * 2 + 1) && (
-                                            <Text>
-                                                {
-                                                    selected.indexOf(i * 2 + 1) + 1
-                                                }
-                                            </Text>
-                                        )
-                                    }
-                                </View>
-                            )
-                        }
+                        <StaticQuoteGraphic quote={quoteInfo2.quote} quotee={quoteInfo2.quotee} timestamp={quotes[i * 2 + 1].id} font={quoteInfo2.font} color={quoteInfo2.color} scale={quoteInfo2.scale} renderHeight={renderHeight} />
                     </View>
                 </TouchableWithoutFeedback>
             </View>
@@ -214,40 +154,11 @@ const HistoryPage = ({ navigation, route }) => {
         quoteRenders.push(
             <View key={Math.floor(quotes.length / 2)} style={styles.singleItemGroup}>
                 <TouchableWithoutFeedback onPress={() => {
-                    if(showSelector){
-                        if(selected.includes(quotes.length - 1)){
-                            let temp = [...selected]
-                            temp.splice(temp.indexOf(quotes.length - 1), 1)
-
-                            setSelected(temp)
-                        } else if(selected.length < 5){
-                            let temp = [...selected]
-                            temp.push(quotes.length - 1)
-
-                            setSelected(temp)
-                        }
-                    } else {
-                        setFocusIndex(quotes.length - 1)
-                        openOverlay()
-                    }
+                    setFocusIndex(quotes.length - 1)
+                    openOverlay()
                 }}>
                     <View ref={sharableImageRef}>
-                        <StaticQuoteGraphic quote={quoteInfo.quote} quotee={quoteInfo.quotee} font={quoteInfo.font} color={quoteInfo.color} scale={quoteInfo.scale} renderHeight={renderHeight} />
-                        {
-                            showSelector && (
-                                <View style={styles.selectorBadge}>
-                                    {
-                                        selected.includes(quotes.length - 1) && (
-                                            <Text>
-                                                {
-                                                    selected.indexOf(quotes.length - 1) + 1
-                                                }
-                                            </Text>
-                                        )
-                                    }
-                                </View>
-                            )
-                        }
+                        <StaticQuoteGraphic quote={quoteInfo.quote} quotee={quoteInfo.quotee} timestamp={quotes[quotes.length - 1].id} font={quoteInfo.font} color={quoteInfo.color} scale={quoteInfo.scale} renderHeight={renderHeight} />
                     </View>
                 </TouchableWithoutFeedback>
             </View>
@@ -264,7 +175,7 @@ const HistoryPage = ({ navigation, route }) => {
                         navigation.goBack()
                     }
                 }}>
-                    <FontAwesomeIcon icon={faX} color={colors.extraLight} size={24} />
+                    <FontAwesomeIcon icon={faXmark} color={colors.extraLight} size={32} />
                 </Button>
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.headerText} numberOfLines={2} ellipsizeMode="tail">
@@ -283,23 +194,8 @@ const HistoryPage = ({ navigation, route }) => {
                         }}>
                             <Text style={styles.createButtonText}>Create New Quote</Text>
                         </Button>
-                        <Button style={styles.createButton} onPress={() => {
-                            setShowSelector(true)
-                            Animated.timing(interactionBarOffset, {
-                                toValue: -180,
-                                duration: 200,
-                                useNativeDriver: true
-                            }).start()
-                        }}>
-                            <Text style={styles.createButtonText}>Share To Quote It</Text>
-                        </Button>
                         {
                             quoteRenders
-                        }
-                        {
-                            showSelector && (
-                                <View style={{ height: 180 }} />
-                            )
                         }
                     </View>
                 </TouchableWithoutFeedback>
@@ -318,10 +214,11 @@ const HistoryPage = ({ navigation, route }) => {
                                             <StaticQuoteGraphic
                                                 quote={quotes[focusIndex].info.quote}
                                                 quotee={quotes[focusIndex].info.quotee}
+                                                timestamp={quotes[focusIndex].id}
                                                 font={quotes[focusIndex].info.font}
                                                 color={quotes[focusIndex].info.color}
                                                 scale={quotes[focusIndex].info.scale}
-                                                renderHeight={screen.height - 380}
+                                                renderHeight={screen.height - 340}
                                             />
                                         )
                                     }
@@ -332,7 +229,7 @@ const HistoryPage = ({ navigation, route }) => {
                                     confirmDeleteOverride ? (
                                         <React.Fragment>
                                             <View style={styles.interactionButtonsContainer}>
-                                                <Button style={[styles.interactionButton, { width: screen.width - 40, backgroundColor: colors.red }]} onPress={() => {
+                                                <Button style={[styles.interactionButton, { width: screen.width - 40 }]} onPress={() => {
                                                     setConfirmDeleteOverride(false)
                                                     closeOverlay()
                                                 }}>
@@ -340,7 +237,7 @@ const HistoryPage = ({ navigation, route }) => {
                                                 </Button>
                                             </View>
                                             <View style={styles.interactionButtonsContainer}>
-                                                <Button style={[styles.interactionButton, { width: screen.width - 40 }]} onPress={deleteQuote}>
+                                                <Button style={[styles.interactionButton, { width: screen.width - 40, backgroundColor: colors.red }]} onPress={deleteQuote}>
                                                     <Text style={styles.interactionButtonText}>Delete</Text>
                                                 </Button>
                                             </View>
@@ -387,72 +284,13 @@ const HistoryPage = ({ navigation, route }) => {
                 )
             }
             {
-                showSelector && (
-                    <Animated.View style={[styles.interactionBarContainer, { transform: [{ translateY: interactionBarOffset }] }]}>
-                        <View style={styles.interactionButtonsContainer}>
-                            <Button style={[styles.interactionButton, { width: screen.width - 40, backgroundColor: colors.red }]} onPress={() => {
-                                Animated.timing(interactionBarOffset, {
-                                    toValue: 0,
-                                    duration: 200,
-                                    useNativeDriver: true
-                                }).start(() => {
-                                    setShowSelector(false)
-                                    setSelected([])
-                                })
-                            }}>
-                                <Text style={styles.interactionButtonText}>Cancel</Text>
-                            </Button>
-                        </View>
-                        <View style={styles.interactionButtonsContainer}>
-                            <Button style={[styles.interactionButton, { width: screen.width - 40 }]} onPress={() => {
-                                if(selected.length == 0){
-                                    Animated.timing(interactionBarOffset, {
-                                        toValue: 0,
-                                        duration: 200,
-                                        useNativeDriver: true
-                                    }).start(() => {
-                                        setShowSelector(false)
-                                        setSelected([])
-                                    })
-                                } else {
-                                    const quotesToShare = []
-                                    selected.forEach((selectedQuote) => {
-                                        quotesToShare.push(quotes[selectedQuote])
-                                    })
-                                    const url = `quoteit://share/${encodeURI(JSON.stringify(quotesToShare))}`
-
-                                    try {
-                                        Share.open({
-                                            message: "Shared from Quote It",
-                                            url
-                                        }).then(() => {
-                                            Animated.timing(interactionBarOffset, {
-                                                toValue: 0,
-                                                duration: 200,
-                                                useNativeDriver: true
-                                            }).start(() => {
-                                                setShowSelector(false)
-                                                setSelected([])
-                                            })
-                                        })
-                                    } catch(error){
-                                        console.warn(error)
-                                    }
-                                }
-                            }}>
-                                <Text style={styles.interactionButtonText}>Share Selected Quotes ({ selected.length })</Text>
-                            </Button>
-                        </View>
-                    </Animated.View>
-                )
-            }
-            {
-                focusIndex < quotes.length && (
+                focusIndex < quotes.length && false && (
                     <View style={{ position: "absolute", top: screen.height }}>
                         <ViewShot ref={sharableImageRef} style={{ paddingHorizontal: 0.15 * renderHeight, paddingVertical: 0.05 * renderHeight, backgroundColor: colors.extraLight }} >
                             <StaticQuoteGraphic
                                 quote={quotes[focusIndex].info.quote}
                                 quotee={quotes[focusIndex].info.quotee}
+                                timestamp={quotes[focusIndex].id}
                                 font={quotes[focusIndex].info.font}
                                 color={quotes[focusIndex].info.color}
                                 scale={quotes[focusIndex].info.scale}
@@ -473,7 +311,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "row",
-        backgroundColor: colors.extraLight
+        backgroundColor: colors.extraLight,
+        borderBottomWidth: 4,
+        borderBottomColor: colors.flair,
     },
     navigationButton: {
         height: 80,
@@ -491,7 +331,7 @@ const styles = StyleSheet.create({
     },
     headerText: {
         fontFamily: "Roboto",
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: "900",
         color: colors.flair
     },
@@ -551,7 +391,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 0,
         width: screen.width,
-        height: screen.height - 120
+        height: screen.height - 120,
     },
     overlayQuoteGraphicContainer: {
         width: screen.width,
@@ -590,4 +430,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default HistoryPage
+export default QuoteeStack

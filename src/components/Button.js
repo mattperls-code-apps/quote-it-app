@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import React, { useRef, useState } from "react"
 
 import { TouchableWithoutFeedback, Animated } from "react-native"
 
@@ -6,6 +6,8 @@ import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 
 const Button = ({ children, style, onPress }) => {
     const scale = useRef(new Animated.Value(1)).current
+
+    const [pressable, setPressable] = useState(true)
 
     const handlePressIn = () => {
         Animated.timing(scale, {
@@ -28,7 +30,13 @@ const Button = ({ children, style, onPress }) => {
             ReactNativeHapticFeedback.trigger("impactLight", {
                 enableVibrateFallback: false
             })
-            onPress()
+            if(pressable){
+                onPress()
+                setPressable(false)
+                setTimeout(() => {
+                    setPressable(true)
+                }, 400)
+            }
         }}>
             <Animated.View style={[style, { transform: [{ scale }] }]}>
                 {

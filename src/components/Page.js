@@ -28,7 +28,6 @@ const styles = StyleSheet.create({
     page: {
         flex: 1,
         paddingTop: initialWindowMetrics.insets.top,
-        paddingBottom: initialWindowMetrics.insets.bottom,
         paddingLeft: initialWindowMetrics.insets.left,
         paddingRight: initialWindowMetrics.insets.right,
         backgroundColor: colors.extraLight

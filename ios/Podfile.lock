@@ -365,6 +365,8 @@ PODS:
     - React-Core
   - RNGestureHandler (2.4.2):
     - React-Core
+  - RNIap (12.7.3):
+    - React-Core
   - RNReactNativeHapticFeedback (1.13.1):
     - React-Core
   - RNScreens (3.13.1):
@@ -441,6 +443,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNIap (from `../node_modules/react-native-iap`)
   - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -540,6 +543,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNIap:
+    :path: "../node_modules/react-native-iap"
   RNReactNativeHapticFeedback:
     :path: "../node_modules/react-native-haptic-feedback"
   RNScreens:
@@ -602,6 +607,7 @@ SPEC CHECKSUMS:
   ReactCommon: 095366164a276d91ea704ce53cb03825c487a3f2
   RNCAsyncStorage: 81187912cc9a5c2591ddb161e03e587688afb764
   RNGestureHandler: 61628a2c859172551aa2100d3e73d1e57878392f
+  RNIap: e1455cb7a98857095c78856b60b92fbcd4dbea70
   RNReactNativeHapticFeedback: 4085973f5a38b40d3c6793a3ee5724773eae045e
   RNScreens: 40a2cb40a02a609938137a1e0acfbf8fc9eebf19
   RNShare: 2074af48908436c310847c6c47ebb6129db1dc89
@@ -612,4 +618,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: ba0c3cf68694604005000f80434639a98d8edd81
 
-COCOAPODS: 1.10.2
+COCOAPODS: 1.11.3

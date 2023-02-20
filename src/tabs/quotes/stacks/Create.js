@@ -2,25 +2,25 @@ import React, { useState, useEffect } from "react"
 
 import { TouchableWithoutFeedback, View, Text, StyleSheet, Keyboard } from "react-native"
 
-import Page from "../components/Page"
-import Button from "../components/Button"
-import { EditableQuoteGraphic } from "../components/QuoteGraphic"
-import FontOption from "../components/FontOption"
+import Page from "../../../components/Page"
+import Button from "../../../components/Button"
+import { EditableQuoteGraphic } from "../../../components/QuoteGraphic"
+import FontOption from "../../../components/FontOption"
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
-import { faX, faFont, faPalette, faCropAlt } from "@fortawesome/free-solid-svg-icons"
+import { faXmark, faFont, faPalette, faCropAlt } from "@fortawesome/free-solid-svg-icons"
 
 import LinearGradient from "react-native-linear-gradient"
 import Slider from "@react-native-community/slider"
 
 import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 
-import formatQuotee from "../scripts/formatQuotee"
-import Storage from "../scripts/storage"
+import formatQuotee from "../../../scripts/formatQuotee"
+import Storage from "../../../scripts/storage"
 
-import { screen, colors, graphicFonts, graphicColorSchemes } from "../constants"
+import { screen, colors, graphicFonts, graphicColorSchemes } from "../../../constants"
 
-const CreatePage = ({ navigation, route }) => {
+const CreateStack = ({ navigation, route }) => {
     const [initialized, setInitialized] = useState(false)
 
     const [quote, setQuote] = useState()
@@ -55,7 +55,7 @@ const CreatePage = ({ navigation, route }) => {
                 scale
             }, () => {
                 navigation.goBack()
-                navigation.push("History", { formattedQuotee: formatQuotee(quotee) })
+                navigation.push("Quotee", { formattedQuotee: formatQuotee(quotee) })
             })
         })
     }
@@ -102,7 +102,7 @@ const CreatePage = ({ navigation, route }) => {
                 <Button style={[styles.headerButton, { width: 80 }]} onPress={() => {
                     navigation.goBack()
                 }}>
-                    <FontAwesomeIcon icon={faX} color={colors.extraLight} size={24} />
+                    <FontAwesomeIcon icon={faXmark} color={colors.extraLight} size={32} />
                 </Button>
                 <Button style={styles.headerButton} onPress={save}>
                     <Text style={styles.saveButtonText}>Save</Text>
@@ -112,7 +112,7 @@ const CreatePage = ({ navigation, route }) => {
                 initialized && (
                     <React.Fragment>
                         <View style={styles.quoteGraphicContainer}>
-                            <EditableQuoteGraphic quote={quote} setQuote={setQuote} quotee={quotee} setQuotee={setQuotee} font={font} color={color} scale={scale} renderHeight={screen.height - 320} />
+                            <EditableQuoteGraphic quote={quote} setQuote={setQuote} quotee={quotee} setQuotee={setQuotee} timestamp={Date.now()} font={font} color={color} scale={scale} renderHeight={screen.height - 320} />
                         </View>
                         <View style={styles.toolOptionsContainer}>
                             {
@@ -126,7 +126,7 @@ const CreatePage = ({ navigation, route }) => {
                                 })
                                 setTool(tool == "font" ? "" : "font")
                             }}>
-                                <View style={[styles.toolContainer, { backgroundColor: tool == "font" ? colors.extraLight : colors.light, borderWidth: tool == "font" ? 4 : 0 }]}>
+                                <View style={[styles.toolContainer, { borderColor: tool == "font" ? colors.flair : colors.extraLight }]}>
                                     <FontAwesomeIcon icon={faFont} color={colors.flair} size={24} />
                                 </View>
                             </TouchableWithoutFeedback>
@@ -136,7 +136,7 @@ const CreatePage = ({ navigation, route }) => {
                                 })
                                 setTool(tool == "color" ? "" : "color")
                             }}>
-                                <View style={[styles.toolContainer, { backgroundColor: tool == "color" ? colors.extraLight : colors.light, borderWidth: tool == "color" ? 4 : 0 }]}>
+                                <View style={[styles.toolContainer, { borderColor: tool == "color" ? colors.flair : colors.extraLight }]}>
                                     <FontAwesomeIcon icon={faPalette} color={colors.flair} size={24} />
                                 </View>
                             </TouchableWithoutFeedback>
@@ -146,7 +146,7 @@ const CreatePage = ({ navigation, route }) => {
                                 })
                                 setTool(tool == "scale" ? "" : "scale")
                             }}>
-                                <View style={[styles.toolContainer, { backgroundColor: tool == "scale" ? colors.extraLight : colors.light, borderWidth: tool == "scale" ? 4 : 0 }]}>
+                                <View style={[styles.toolContainer, { borderColor: tool == "scale" ? colors.flair : colors.extraLight }]}>
                                     <FontAwesomeIcon icon={faCropAlt} color={colors.flair} size={24} />
                                 </View>
                             </TouchableWithoutFeedback>
@@ -165,7 +165,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         flexDirection: "row",
-        backgroundColor: colors.extraLight
+        backgroundColor: colors.extraLight,
+        borderBottomWidth: 4,
+        borderBottomColor: colors.flair,
     },
     headerButton: {
         height: 80,
@@ -198,7 +200,6 @@ const styles = StyleSheet.create({
     toolsContainer: {
         width: screen.width,
         height: 100,
-        backgroundColor: colors.extraLight,
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "row"
@@ -206,7 +207,8 @@ const styles = StyleSheet.create({
     toolContainer: {
         width: 60,
         height: 60,
-        borderColor: colors.light,
+        borderWidth: 4,
+        backgroundColor: colors.extraLight,
         marginHorizontal: 15,
         borderRadius: 15,
         alignItems: "center",
@@ -214,4 +216,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default CreatePage
+export default CreateStack

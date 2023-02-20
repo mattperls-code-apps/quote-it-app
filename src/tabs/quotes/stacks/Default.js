@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from "react"
 
-import { View, Text, FlatList, StyleSheet, Linking } from "react-native"
+import { View, Text, FlatList, StyleSheet } from "react-native"
 
-import Page from "../components/Page"
-import Button from "../components/Button"
-import Quotee from "../components/Quotee"
+import Page from "../../../components/Page"
+import Button from "../../../components/Button"
+import { QuoteeLink } from "../../../components/Quotee"
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
-import { faPlus, faInfo } from "@fortawesome/free-solid-svg-icons"
+import { faPlus } from "@fortawesome/free-solid-svg-icons"
 
 import SplashScreen from "react-native-splash-screen"
-import { CommonActions } from "@react-navigation/native"
 
-import isValid from "../scripts/validateShare"
-import formatQuotee from "../scripts/formatQuotee"
-import Storage from "../scripts/storage"
+import Storage from "../../../scripts/storage"
 
-import { screen, colors } from "../constants"
+import { screen, colors } from "../../../constants"
 
-const HomePage = ({ navigation }) => {
+const DefaultStack = ({ navigation }) => {
     const [quotees, setQuotees] = useState([])
 
     let sum = 0
@@ -39,35 +36,15 @@ const HomePage = ({ navigation }) => {
             }
         })
 
-        const deepLinkSubscriber = Linking.addEventListener("url", ({ url }) => {
-            const expectedPrefix = "quoteit://share/"
-
-            if(url.slice(0, expectedPrefix.length) == expectedPrefix){
-                const rawData = decodeURI(url.slice(expectedPrefix.length))
-
-                try {
-                    const data = JSON.parse(rawData)
-
-                    if(Array.isArray(data) && data.every(isValid)){
-                        storage.updateMultiple(data, () => {
-                            navigation.dispatch(CommonActions.navigate({
-                                name: "Home"
-                            }))
-
-                            setTimeout(() => {
-                                if(mounted){
-                                    navigation.push("History", { formattedQuotee: formatQuotee(data[0].info.quotee) })
-                                }
-                            }, 300)
-                        })
-                    }
-                } catch(e){
-                    console.warn(e)
+        const stackNavigationSubscriber = navigation.addListener("state", () => {
+            storage.initialize(() => {
+                if(mounted){
+                    setQuotees(storage.getQuotees())
                 }
-            }
+            })
         })
 
-        const navigationSubscriber = navigation.addListener("state", () => {
+        const tabNavigationSubscriber = navigation.getParent().addListener("state", () => {
             storage.initialize(() => {
                 if(mounted){
                     setQuotees(storage.getQuotees())
@@ -78,9 +55,10 @@ const HomePage = ({ navigation }) => {
         return () => {
             mounted = false
 
-            deepLinkSubscriber.remove()
-
-            return navigationSubscriber
+            return () => {
+                stackNavigationSubscriber()
+                tabNavigationSubscriber()
+            }
         }
     }, [])
 
@@ -88,7 +66,7 @@ const HomePage = ({ navigation }) => {
         <Page>
             <View style={styles.headerContainer}>
                 <View style={styles.headerTextContainer}>
-                    <Text style={styles.headerText}>Quote It</Text>
+                    <Text style={styles.headerText}>Your Quotes</Text>
                 </View>
                 <Button style={styles.createButton} onPress={() => {
                     navigation.push("Create", { id: Date.now() })
@@ -106,9 +84,9 @@ const HomePage = ({ navigation }) => {
                         <View style={[styles.quotesCountContainer, { transform: [{ translateY: Math.min(-scrollOffset, 80) }] }]}>
                             <Text style={styles.quotesCountText}>{ sum } quotes</Text>
                         </View>
-                        <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }} data={quotees} renderItem={({ item, index }) => {
+                        <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 8 }} data={quotees} renderItem={({ item, index }) => {
                             return (
-                                <Quotee key={index} navigation={navigation} formattedQuotee={item.formattedQuotee} quotesCount={item.quotesCount} />
+                                <QuoteeLink key={index} navigation={navigation} formattedQuotee={item.formattedQuotee} quotesCount={item.quotesCount} />
                             )
                         }} scrollEventThrottle={2} onScroll={(event) => {
                             setScrollOffset(event.nativeEvent.contentOffset.y)
@@ -116,11 +94,6 @@ const HomePage = ({ navigation }) => {
                     </React.Fragment>
                 )
             }
-            <Button style={styles.infoButton} onPress={() => {
-                navigation.push("PrivacyPolicy")
-            }}>
-                <FontAwesomeIcon icon={faInfo} color={colors.extraLight} size={18} />
-            </Button>
         </Page>
     )
 }
@@ -144,7 +117,7 @@ const styles = StyleSheet.create({
     },
     headerText: {
         fontFamily: "Roboto",
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: "900",
         color: colors.flair
     },
@@ -186,18 +159,7 @@ const styles = StyleSheet.create({
         fontWeight: "300",
         fontSize: 24,
         color: colors.dark
-    },
-    infoButton: {
-        position: "absolute",
-        bottom: 20,
-        right: 20,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: colors.flair
     }
 })
 
-export default HomePage
+export default DefaultStack
