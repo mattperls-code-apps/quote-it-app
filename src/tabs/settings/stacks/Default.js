@@ -1,9 +1,11 @@
 import React from "react"
 
-import { View, Text, StyleSheet, Linking } from "react-native"
+import { ScrollView, View, Text, StyleSheet, Linking } from "react-native"
 
 import Page from "../../../components/Page"
 import Button from "../../../components/Button"
+
+import { restorePurchases } from "../../../scripts/iap"
 
 import { screen, colors } from "../../../constants"
 
@@ -15,21 +17,23 @@ const DefaultStack = ({ navigation }) => {
                     <Text style={styles.headerText}>Settings</Text>
                 </View>
             </View>
-            <Button style={styles.button} onPress={() => {
-                navigation.push("Privacy")
-            }}>
-                <Text style={styles.buttonText}>Privacy Policy</Text>
-            </Button>
-            <Button style={styles.button} onPress={() => {
-                navigation.push("Apps")
-            }}>
-                <Text style={styles.buttonText}>Other Apps</Text>
-            </Button>
-            <Button style={styles.button} onPress={() => {
-                Linking.openURL("mailto:mattperls.code@gmail.com")
-            }}>
-                <Text style={styles.buttonText}>Contact Me</Text>
-            </Button>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <Button style={styles.button} onPress={() => {
+                    navigation.push("Privacy")
+                }}>
+                    <Text style={styles.buttonText}>Privacy Policy</Text>
+                </Button>
+                <Button style={styles.button} onPress={() => {
+                    navigation.push("Apps")
+                }}>
+                    <Text style={styles.buttonText}>Other Apps</Text>
+                </Button>
+                <Button style={styles.button} onPress={() => {
+                    Linking.openURL("mailto:mattperls.code@gmail.com")
+                }}>
+                    <Text style={styles.buttonText}>Contact Me</Text>
+                </Button>
+            </ScrollView>
         </Page>
     )
 }

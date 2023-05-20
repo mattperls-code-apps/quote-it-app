@@ -3,7 +3,6 @@ import React, { useEffect } from "react"
 import { createStackNavigator } from "@react-navigation/stack"
 
 import DefaultStack from "./stacks/Default"
-import SelectStack from "./stacks/Select"
 import GameStack from "./stacks/Game"
 import ResultsStack from "./stacks/Results"
 
@@ -24,10 +23,10 @@ const RouletteTab = ({ navigation }) => {
 
     return (
         <Stack.Navigator initialRouteName={"Default"} screenOptions={{
-            headerShown: false
+            headerShown: false,
+            gestureEnabled: false
         }}>
             <Stack.Screen name={"Default"} component={DefaultStack} />
-            <Stack.Screen name={"Select"} component={SelectStack} />
             <Stack.Screen name={"Game"} component={GameStack} />
             <Stack.Screen name={"Results"} component={ResultsStack} />
         </Stack.Navigator>

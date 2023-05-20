@@ -6,9 +6,10 @@ import { NavigationContainer } from "@react-navigation/native"
 import  { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
-import { faHome, faPersonCircleQuestion, faCogs } from "@fortawesome/free-solid-svg-icons"
+import { faHome, faPersonCircleQuestion, faCogs, faSearch } from "@fortawesome/free-solid-svg-icons"
 
 import QuotesTab from "./tabs/quotes/Quotes"
+import SearchTab from "./tabs/search/Search"
 import RouletteTab from "./tabs/roulette/Roulette"
 import SettingsTab from "./tabs/settings/Settings"
 
@@ -34,6 +35,9 @@ const App = () => {
                             case "Quotes":
                                 icon = faHome
                                 break
+                            case "Search":
+                                icon = faSearch
+                                break
                             case "Roulette":
                                 icon = faPersonCircleQuestion
                                 break
@@ -51,6 +55,7 @@ const App = () => {
                 }
             }}>
                 <Tab.Screen name={"Quotes"} component={QuotesTab} />
+                <Tab.Screen name={"Search"} component={SearchTab} />
                 <Tab.Screen name={"Roulette"} component={RouletteTab} />
                 <Tab.Screen name={"Settings"} component={SettingsTab} />
             </Tab.Navigator>

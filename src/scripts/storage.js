@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
-import { needsUpdate, convert } from "./infrastructureChange"
+import { needsUpdate1, convert1, needsUpdate2, convert2 } from "./infrastructureChange"
 import formatQuotee from "./formatQuotee"
 
 class Storage {
@@ -29,9 +29,13 @@ class Storage {
                                 // handle infrastructure change
                                 let rewrite = false
                                 for(let i = 0;i<this.items.length;i++){
-                                    if(needsUpdate(this.items[i].info)){
+                                    if(needsUpdate1(this.items[i].info)){
                                         rewrite = true
-                                        this.items[i].info = convert(this.items[i].info)
+                                        this.items[i].info = convert1(this.items[i].info)
+                                    }
+                                    if(needsUpdate2(this.items[i].info)){
+                                        rewrite = true
+                                        this.items[i].info = convert2(this.items[i].info)
                                     }
                                 }
                                 if(rewrite){
@@ -93,6 +97,17 @@ class Storage {
     getFromQuotee(formattedQuotee){
         return this.items.filter((item) => formatQuotee(item.info.quotee) == formattedQuotee)
     }
+    getFavorites(){
+        const favorites = []
+
+        for(let i = 0;i<this.items.length;i++){
+            if(this.items[i].info.favorite){
+                favorites.push(this.items[i])
+            }
+        }
+
+        return favorites
+    }
     getInfo(id){
         for(let i = 0;i<this.items.length;i++){
             if(this.items[i].id == id){
@@ -101,7 +116,8 @@ class Storage {
                     quotee: this.items[i].info.quotee,
                     font: this.items[i].info.font,
                     color: this.items[i].info.color,
-                    scale: this.items[i].info.scale
+                    scale: this.items[i].info.scale,
+                    favorite: this.items[i].info.favorite
                 }
             }
         }
@@ -110,7 +126,8 @@ class Storage {
             quotee: "",
             font: 0,
             color: 0,
-            scale: 1
+            scale: 1,
+            favorite: false
         }
     }
     update(id, info, callback){

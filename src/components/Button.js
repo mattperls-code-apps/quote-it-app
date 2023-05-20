@@ -33,9 +33,12 @@ const Button = ({ children, style, onPress }) => {
             if(pressable){
                 onPress()
                 setPressable(false)
-                setTimeout(() => {
+                
+                const subscriber = setTimeout(() => {
                     setPressable(true)
                 }, 400)
+
+                return () => clearTimeout(subscriber)
             }
         }}>
             <Animated.View style={[style, { transform: [{ scale }] }]}>

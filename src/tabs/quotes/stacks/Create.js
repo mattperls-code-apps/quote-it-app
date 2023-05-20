@@ -30,18 +30,23 @@ const CreateStack = ({ navigation, route }) => {
     const [scale, setScale] = useState()
 
     useEffect(() => {
+        let mounted = true
         const storage = new Storage()
         storage.initialize(() => {
-            const info = storage.getInfo(route.params.id)
+            if(mounted){
+                const info = storage.getInfo(route.params.id)
+                
+                setQuote(info.quote)
+                setQuotee(route.params.quotee ?? info.quotee)
+                setFont(info.font)
+                setColor(info.color)
+                setScale(info.scale)
 
-            setQuote(info.quote)
-            setQuotee(route.params.quotee ?? info.quotee)
-            setFont(info.font)
-            setColor(info.color)
-            setScale(info.scale)
-
-            setInitialized(true)
+                setInitialized(true)
+            }
         })
+
+        return () => mounted = false
     }, [])
 
     const save = () => {

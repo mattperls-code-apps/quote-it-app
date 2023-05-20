@@ -13,7 +13,8 @@ const colors = {
     extraDark: "rgb(0, 0, 0)",
     flair: "rgb(100, 150, 250)",
     red: "rgb(240, 110, 110)",
-    green: "rgb(40, 250, 120)"
+    green: "rgb(40, 250, 120)",
+    gold: "rgb(240, 190, 0)"
 }
 
 const graphicFontsV1 = [

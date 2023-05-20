@@ -3,13 +3,13 @@ import React, { useRef } from "react"
 import { TouchableWithoutFeedback, View, Text, StyleSheet, Animated } from "react-native"
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
-import { faChevronRight, faCheck, faXmark } from "@fortawesome/free-solid-svg-icons"
+import { faChevronRight, faCheck, faXmark, faStar } from "@fortawesome/free-solid-svg-icons"
 
 import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 
 import { screen, colors } from "../constants"
 
-const QuoteeLink = ({ navigation, formattedQuotee, quotesCount }) => {
+const QuoteeLink = ({ navigation, formattedQuotee, quotesCount, favorite }) => {
     const shadowChildOffset = useRef(new Animated.Value(-4)).current
 
     const handlePressIn = () => {
@@ -33,11 +33,15 @@ const QuoteeLink = ({ navigation, formattedQuotee, quotesCount }) => {
             ReactNativeHapticFeedback.trigger("impactLight", {
                 enableVibrateFallback: false
             })
-            navigation.push("Quotee", { formattedQuotee })
+            if(favorite){
+                navigation.push("Favorites")
+            } else {
+                navigation.push("Quotee", { formattedQuotee })
+            }
         }}>
-            <View style={styles.quoteeShadow}>
+            <View style={{ ...styles.quoteeShadow, backgroundColor: favorite ? colors.gold : colors.flair }}>
                 <Animated.View style={[styles.quoteeContainer, { transform: [{ translateY: shadowChildOffset }] }]}>
-                    <View style={styles.quotesCountTextContainer}>
+                    <View style={{ ...styles.quotesCountTextContainer, backgroundColor: favorite ? colors.gold : colors.flair }}>
                         <Text style={styles.quotesCountText}>
                             {
                                 quotesCount
@@ -47,12 +51,12 @@ const QuoteeLink = ({ navigation, formattedQuotee, quotesCount }) => {
                     <View style={styles.quoteeTextContainer}>
                         <Text style={styles.quoteeText} numberOfLines={1} ellipsizeMode={"tail"}>
                             {
-                                formattedQuotee
+                                favorite ? "Favorite Quotes" : formattedQuotee
                             }
                         </Text>
                     </View>
                     <View style={styles.quoteeNavigateButton}>
-                        <FontAwesomeIcon icon={faChevronRight} color={colors.flair} size={24} />
+                        <FontAwesomeIcon icon={favorite ? faStar : faChevronRight} color={favorite ? colors.gold : colors.flair} size={24} />
                     </View>
                 </Animated.View>
             </View>
@@ -86,7 +90,7 @@ const QuoteeSelectable = ({ formattedQuotee, selected, toggleSelected }) => {
             })
             toggleSelected()
         }}>
-            <View style={styles.quoteeShadow}>
+            <View style={{ ...styles.quoteeShadow, backgroundColor: selected ? colors.green : colors.red }}>
                 <Animated.View style={[styles.quoteeContainer, { transform: [{ translateY: shadowChildOffset }] }]}>
                     <View style={{ ...styles.quoteSelectedContainer, backgroundColor: selected ? colors.green : colors.red }}>
                         <FontAwesomeIcon icon={selected ? faCheck : faXmark} color={colors.extraDark} size={24} />
@@ -109,8 +113,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
         width: screen.width,
         height: 80,
-        borderRadius: 10,
-        backgroundColor: colors.flair
+        borderRadius: 10
     },
     quoteeContainer: {
         width: screen.width,

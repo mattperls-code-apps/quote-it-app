@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, Alert } from "react-native"
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
 import { faXmark } from "@fortawesome/free-solid-svg-icons"
@@ -81,10 +81,19 @@ const GameStack = ({ navigation, route }) => {
     return (
         <Page>
             <View style={styles.headerContainer}>
-                {
-                    // TODO: prevent slide back and prompt to make sure
-                }
-                <Button style={[styles.navigationButton, { width: 80 }]} onPress={navigation.goBack}>
+                <Button style={[styles.navigationButton, { width: 80 }]} onPress={() => {
+                    Alert.alert("Are You Sure?", "If you exit the page your progress for this round will be lost.", [
+                        {
+                            text: "Cancel",
+                            style: "cancel"
+                        },
+                        {
+                            text: "Yes",
+                            onPress: navigation.goBack,
+                            style: "default"
+                        }
+                    ])
+                }}>
                     <FontAwesomeIcon icon={faXmark} color={colors.extraLight} size={32} />
                 </Button>
                 <View style={styles.headerTextContainer}>
@@ -172,7 +181,7 @@ const styles = StyleSheet.create({
         width: 0.5 * screen.width - 30,
         height: 60,
         marginLeft: 20,
-        borderRadius: 20,
+        borderRadius: 10,
         backgroundColor: colors.extraLight,
         borderWidth: 4,
         borderColor: colors.flair

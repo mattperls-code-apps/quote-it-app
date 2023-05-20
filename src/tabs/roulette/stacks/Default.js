@@ -1,92 +1,76 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 
-import { View, Text, StyleSheet, Animated, Alert } from "react-native"
+import { TouchableWithoutFeedback, View, Text, FlatList, StyleSheet, Alert } from "react-native"
+
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons"
 
 import Page from "../../../components/Page"
 import Button from "../../../components/Button"
-import { StaticQuoteGraphic } from "../../../components/QuoteGraphic"
+import { QuoteeSelectable } from  "../../../components/Quotee"
 
-import { StackActions } from "@react-navigation/native"
+import Storage from "../../../scripts/storage"
+import roulette from "../../../scripts/roulette"
 
-import { initConnection, purchaseUpdatedListener, finishTransaction, getProducts, requestPurchase, endConnection } from "react-native-iap"
-
-import { hasPurchase, addPurchase } from "../../../scripts/iap"
-
-import { screen, colors, purchaseIds } from "../../../constants"
+import { screen, colors } from "../../../constants"
 
 const DefaultStack = ({ navigation }) => {
-    const [carouselIndex, setCarouselIndex] = useState(0)
+    const [items, setItems] = useState([])
+    const [selectedQuotees, setSelectedQuotees] = useState({})
 
-    const carouselOffset = useRef(new Animated.Value(0)).current
-    
     useEffect(() => {
         let mounted = true
 
-        hasPurchase(purchaseIds.roulette, (hasAccess) => {
-            if(mounted && hasAccess){
-                navigation.dispatch(StackActions.replace("Select"))
-            }
-        })
+        const subscriber = navigation.getParent().addListener("state", () => {
+            const storage = new Storage()
 
-        let purchaseSubscriber = null
+            storage.initialize(() => {
+                if(mounted){
+                    setItems(storage.items)
 
-        initConnection().then(() => {
-            if(mounted){
-                purchaseSubscriber = purchaseUpdatedListener((purchase) => {
-                    addPurchase(purchaseIds.roulette, purchase.transactionReceipt, () => {
-                        if(mounted){
-                            finishTransaction({ purchase, isConsumable: false }).then(() => {
-                                if(mounted){
-                                    navigation.dispatch(StackActions.replace("Select"))
-                                }
-                            }).catch((error) => {
-                                console.warn(error)
-                                Alert.alert("Error Purchasing", "An error occurred while purchasing. Please try again.")
-                            })
+                    const selectedMap = {}
+
+                    storage.getQuotees().forEach(quotee => {
+                        if(typeof selectedQuotees[quotee.formattedQuotee] == "boolean"){
+                            selectedMap[quotee.formattedQuotee] = selectedQuotees[quotee.formattedQuotee]
+                        } else {
+                            selectedMap[quotee.formattedQuotee] = true
                         }
                     })
-                })
-            }
-            
-        }).catch((error) => {
-            console.warn(error)
+
+                    setSelectedQuotees(selectedMap)
+                }
+            })
         })
 
         return () => {
             mounted = false
 
-            endConnection()
-
-            if (purchaseSubscriber) purchaseSubscriber.remove() 
+            subscriber()
         }
-    }, [])
+    }, [selectedQuotees])
 
-    useEffect(() => {
-        let mounted = true
+    const renderSelectable = ({ item, index }) => {
+        const quotee = item[0]
+        const selected = item[1]
 
-        setTimeout(() => {
-            if(mounted){
-                if(carouselIndex == 3){
-                    setCarouselIndex(1)
-                    carouselOffset.setValue(0)
-                    Animated.timing(carouselOffset, {
-                        toValue: -screen.width,
-                        duration: 400,
-                        useNativeDriver: true
-                    }).start()
-                } else {
-                    setCarouselIndex(carouselIndex + 1)
-                    Animated.timing(carouselOffset, {
-                        toValue: -screen.width * (carouselIndex + 1),
-                        duration: 400,
-                        useNativeDriver: true
-                    }).start()
-                }
-            }
-        }, 3000)
+        const toggleSelected = () => {
+            const temp = { ...selectedQuotees }
+            temp[quotee] = !temp[quotee]
 
-        return () => mounted = false
-    }, [carouselIndex])
+            setSelectedQuotees(temp)
+        }
+
+        return (
+            <QuoteeSelectable key={index} formattedQuotee={quotee} selected={selected} toggleSelected={toggleSelected} />
+        )
+    }
+
+    const generateGame = () => {
+        const quoteeList = Object.entries(selectedQuotees).filter(entry => entry[1]).map(entry => entry[0])
+
+        return roulette(Storage.fromItems(items), quoteeList)
+    }
 
     return (
         <Page>
@@ -94,61 +78,32 @@ const DefaultStack = ({ navigation }) => {
                 <View style={styles.headerTextContainer}>
                     <Text style={styles.headerText}>Quote Roulette</Text>
                 </View>
+                <Button style={styles.createButton} onPress={() => {
+                    if(Object.entries(selectedQuotees).filter(entry => entry[1]).length > 1){
+                        navigation.push("Game", { questions: generateGame() })
+                    } else {
+                        Alert.alert("Not Enough People", "You need to select at least 2 people to create a game.")
+                    }
+                }}>
+                    <FontAwesomeIcon icon={faChevronRight} color={colors.extraLight} size={32} />
+                </Button>
             </View>
-            <View style={styles.carouselWrapper}>
-                <Animated.View style={{ ...styles.carouselContainer, transform: [{ translateX: carouselOffset }] }}>
-                    <View style={styles.carouselItem}>
-                        <View style={styles.carouselItemHeaderContainer}>
-                            <Text style={styles.carouselItemHeaderText}>See How Well You{ "\n" }Know Your Friends</Text>
-                        </View>
-                        <View style={styles.carouselItemBodyContainer}>
-                            <StaticQuoteGraphic quote={"Ow my foot\n\nSomeone call the toe truck"} quotee={"???"} showDate={false} font={1} color={5} scale={1.2} renderHeight={screen.height - 400} />
-                        </View>
+            {
+                Object.keys(selectedQuotees).length == 0 ? (
+                    <View style={styles.emptyMessageContainer}>
+                        <Text style={styles.emptyMessage}>No quotes yet</Text>
                     </View>
-                    <View style={styles.carouselItem}>
-                        <View style={styles.carouselItemHeaderContainer}>
-                            <Text style={styles.carouselItemHeaderText}>Guess Who Said{"\n"}Which Quote</Text>
-                        </View>
-                        <View style={styles.carouselItemBodyContainer}>
-                            <View style={styles.quoteeOptionContainer1}>
-                                <Text style={styles.quoteeOptionText}>Mo Lipkin</Text>
+                ) : (
+                    // content container > paddingBottom: 80
+                    <FlatList contentContainerStyle={{ paddingBottom: 8 }} showsVerticalScrollIndicator={false} data={Object.entries(selectedQuotees)} renderItem={renderSelectable} ListHeaderComponent={(
+                        <TouchableWithoutFeedback>
+                            <View style={styles.instructionsContainer}>
+                                <Text style={styles.instructionsText}>Select Included Quotees</Text>
                             </View>
-                            <Text style={styles.orText}>or</Text>
-                            <View style={styles.quoteeOptionContainer2}>
-                                <Text style={styles.quoteeOptionText}>Elite Lim</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={styles.carouselItem}>
-                        <View style={styles.carouselItemHeaderContainer}>
-                            <Text style={styles.carouselItemHeaderText}>One Time Payment{"\n"}Play Forever</Text>
-                        </View>
-                        <View style={styles.carouselItemBodyContainer}>
-                            <Text style={styles.dollarText}>$0.99</Text>
-                        </View>
-                    </View>
-                    <View style={styles.carouselItem}>
-                        <View style={styles.carouselItemHeaderContainer}>
-                            <Text style={styles.carouselItemHeaderText}>See How Well You{ "\n" }Know Your Friends</Text>
-                        </View>
-                        <View style={styles.carouselItemBodyContainer}>
-                            <StaticQuoteGraphic quote={"Ow my foot\n\nSomeone call the toe truck"} quotee={"???"} showDate={false} font={1} color={5} scale={1.2} renderHeight={screen.height - 400} />
-                        </View>
-                    </View>
-                </Animated.View>
-            </View>
-            <Button style={styles.purchaseButton} onPress={() => {
-                getProducts({ skus: [ purchaseIds.roulette ] }).then(() => {
-                    requestPurchase({ sku: purchaseIds.roulette }).then(() => {}).catch((error) => {
-                        console.warn(error)
-                    })
-                }).catch((error) => {
-                    console.warn(error)
-                    Alert.alert("Error Purchasing", "An error occurred while purchasing. Please try again.")
-                })
-            }}>
-                <Text style={styles.purchaseButtonText}>Purchase Extension</Text>
-            </Button>
+                        </TouchableWithoutFeedback>
+                    )} />
+                )
+            }
         </Page>
     )
 }
@@ -176,109 +131,42 @@ const styles = StyleSheet.create({
         fontWeight: "900",
         color: colors.flair
     },
-    carouselWrapper: {
-        width: screen.width,
-        height: screen.height - 260,
-        marginTop: 20
-    },
-    carouselContainer: {
-        flexDirection: "row",
-        width: 4 * screen.width,
-        height: screen.height - 260
-    },
-    carouselItem: {
-        width: screen.width - 40,
-        height: screen.height - 260,
+    createButton: {
+        marginTop: 20,
+        marginLeft: 20,
+        width: 80,
+        height: 80,
         borderRadius: 20,
-        marginHorizontal: 20,
-        backgroundColor: colors.extraLight,
-        borderWidth: 4,
-        borderColor: colors.flair
-    },
-    carouselItemHeaderContainer: {
         alignItems: "center",
         justifyContent: "center",
-        width: screen.width - 40,
-        height: 100
+        backgroundColor: colors.flair
     },
-    carouselItemHeaderText: {
-        fontFamily: "Roboto",
-        fontWeight: "600",
-        fontSize: 24,
+    emptyMessageContainer: {
+        marginTop: 40,
+        width: screen.width,
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "row"
+    },
+    emptyMessage: {
         textAlign: "center",
-        color: colors.extraDark
-    },
-    carouselItemBodyContainer: {
-        alignItems: "center",
-        justifyContent: "center",
-        width: screen.width - 40,
-        height: screen.height - 390
-    },
-    quoteeOptionContainer1: {
-        alignItems: "center",
-        justifyContent: "center",
-        width: 0.42 * screen.width - 30,
-        height: 0.32 * (0.5 * screen.width - 30),
-        borderRadius: 0.05 * (0.5 * screen.width - 30),
-        transform: [
-            {
-                translateX: -0.12 * (0.5 * screen.width - 30)
-            },
-            {
-                translateY: -0.06 * (0.5 * screen.width - 30)
-            }
-        ],
-        backgroundColor: colors.flair
-    },
-    quoteeOptionContainer2: {
-        alignItems: "center",
-        justifyContent: "center",
-        width: 0.42 * screen.width - 30,
-        height: 0.32 * (0.5 * screen.width - 30),
-        borderRadius: 0.05 * (0.5 * screen.width - 30),
-        transform: [
-            {
-                translateX: 0.12 * (0.5 * screen.width - 30),
-            },
-            {
-                translateY: 0.06 * (0.5 * screen.width - 30)
-            }
-        ],
-        backgroundColor: colors.flair
-    },
-    quoteeOptionText: {
         fontFamily: "Roboto",
-        fontWeight: "600",
-        fontSize: 16,
-        color: colors.extraLight
-    },
-    orText: {
-        fontFamily: "Roboto",
-        fontWeight: "600",
+        fontWeight: "100",
         fontSize: 20,
         color: colors.extraDark
     },
-    dollarText: {
-        fontFamily: "Roboto",
-        fontWeight: "900",
-        fontSize: 0.2 * (screen.width - 40),
-        color: colors.green
-    },
-    purchaseButton: {
-        marginTop: 20,
-        width: screen.width - 40,
-        height: 80,
-        borderRadius: 20,
-        alignSelf: "center",
+    instructionsContainer: {
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: colors.flair
+        width: screen.width,
+        padding: 20,
+        paddingBottom: 10
     },
-    purchaseButtonText: {
+    instructionsText: {
         fontFamily: "Roboto",
-        fontWeight: "600",
-        fontSize: 24,
-        color: colors.extraLight
+        fontWeight: "300",
+        fontSize: 20,
+        color: colors.dark
     }
 })
 
