@@ -19,6 +19,10 @@ target 'quoteit' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'react-native-webview', :path => '../node_modules/react-native-webview'
+
+  pod 'RNQrGenerator', :path => '../node_modules/rn-qr-generator'
+
   target 'quoteitTests' do
     inherit! :complete
     # Pods for testing
