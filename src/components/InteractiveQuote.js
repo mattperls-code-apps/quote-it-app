@@ -13,20 +13,40 @@ import Share from "react-native-share"
 
 import Storage from "../scripts/storage"
 
+import Canvas from "react-native-canvas"
+
 import { colors, screen } from "../constants"
+import { embedImage } from "../scripts/embedImage"
 
 const InteractiveQuote = ({ navigation, quote, quotee, timestamp, font, color, scale, favorite, renderHeight, last, onMutate }) => {
+    const [canvas1, setCanvas1] = useState(null)
+    const [canvas2, setCanvas2] = useState(null)
     const sharableImageRef = useRef()
+    const handleEmbed1 = cnvs => {
+        if (!cnvs) return
+        setCanvas1(cnvs)
+    }
+
+    const handleEmbed2 = cnvs => {
+        if (!cnvs) return
+        setCanvas2(cnvs)
+    }
+
 
     const handleShare = () => {
         captureRef(sharableImageRef, {
             format: "jpg"
         }).then(url => {
-            try {
-                Share.open({ url, failOnCancel: false })
-            } catch(error){
-                console.warn(error)
-            }
+
+            embedImage(url, quote, quotee, canvas1, canvas2).then(imgUrl => {
+                try {
+                    Share.open({ imgUrl, failOnCancel: false })
+                } catch (error) {
+                    console.warn(error)
+                }
+            })
+
+
         })
     }
 
@@ -76,6 +96,8 @@ const InteractiveQuote = ({ navigation, quote, quotee, timestamp, font, color, s
 
     return (
         <TouchableWithoutFeedback>
+            <Canvas ref={handleEmbed1} style={{ backfaceVisibility: "hidden" }} />
+            <Canvas ref={handleEmbed2} style={{ backfaceVisibility: "hidden" }} />
             <View style={{ ...styles.container, borderBottomWidth: last ? 0 : 4 }}>
                 <View ref={sharableImageRef} style={{ ...styles.graphicContainer, height: renderHeight + 40 }}>
                     <StaticQuoteGraphic quote={quote} quotee={quotee} timestamp={timestamp} font={font} color={color} scale={scale} renderHeight={renderHeight} />
@@ -136,7 +158,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "700",
         color: colors.extraLight
-    }
+    },
+
 })
 
 export default InteractiveQuote
