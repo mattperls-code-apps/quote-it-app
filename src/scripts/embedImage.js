@@ -34,8 +34,7 @@ export const embedImage = (image, quote, quotee, canvas1, canvas2) => {
             ctx.getImageData(0, 0, canvas.width, canvas.height).then((embedData) => {
                 let blackCount = 0;
                 let whiteCount = 0;
-                let count = 0;
-
+            
                 for (let i = 0; i < embedData.data.length; i++) {
 
                     for (let j = 0; j < embedData.data.height; j++) {
